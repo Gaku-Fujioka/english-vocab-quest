@@ -669,6 +669,34 @@
   gap: 4px;
 }
 
+.settings-section {
+  display: grid;
+  gap: 12px;
+}
+
+.settings-message {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.settings-message--success {
+  background: #ebfadd;
+  color: var(--color-primary-dark);
+}
+
+.settings-message--error {
+  background: var(--color-red-soft);
+  color: var(--color-red);
+}
+
+.settings-message--info {
+  background: #d8ebff;
+  color: #075aa8;
+}
+
 .option-list,
 .action-list {
   display: grid;
@@ -711,6 +739,47 @@
 
 .action-row {
   color: var(--color-blue);
+}
+
+.file-picker {
+  min-height: 78px;
+  padding: 12px;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  display: grid;
+  gap: 10px;
+}
+
+.file-picker span {
+  display: grid;
+  gap: 3px;
+}
+
+.file-picker strong {
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.file-picker small {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.file-picker input {
+  width: 100%;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.file-picker input::file-selector-button {
+  min-height: 34px;
+  margin-right: 10px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  font-weight: 800;
 }
 
 .danger-panel {

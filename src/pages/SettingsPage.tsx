@@ -1,21 +1,182 @@
+import { useState, type ChangeEvent } from 'react'
+import {
+  downloadAppBackup,
+  parseAppBackupJson,
+  parseVocabularyCsv,
+} from '../lib/importExport'
+import type { AppStorageSnapshot } from '../lib/storage'
 import type { AppSettings, TargetScore } from '../types/settings'
 import { TARGET_SCORES } from '../types/settings'
+import type { Word } from '../types/word'
+
+type SettingsMessage = {
+  type: 'success' | 'error' | 'info'
+  text: string
+}
 
 type SettingsPageProps = {
+  appSnapshot: AppStorageSnapshot
+  onAppDataReplace: (snapshot: AppStorageSnapshot) => void
+  onResetAllData: () => void
   onSettingsChange: (settings: AppSettings) => void
+  onVocabularyReplace: (words: Word[]) => void
   settings: AppSettings
   wordCount: number
 }
 
 export function SettingsPage({
+  appSnapshot,
+  onAppDataReplace,
+  onResetAllData,
   onSettingsChange,
+  onVocabularyReplace,
   settings,
   wordCount,
 }: SettingsPageProps) {
+  const [message, setMessage] = useState<SettingsMessage | null>(null)
+
   const handleTargetScoreChange = (targetScore: TargetScore) => {
     onSettingsChange({
       ...settings,
       targetScore,
+    })
+    setMessage({
+      type: 'success',
+      text: `目標スコアを TOEIC ${targetScore} に更新しました。`,
+    })
+  }
+
+  const handleCsvImport = async (event: ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget
+    const file = input.files?.[0]
+
+    if (file === undefined) {
+      return
+    }
+
+    try {
+      const importResult = parseVocabularyCsv(await file.text())
+
+      if (!importResult.ok) {
+        setMessage({
+          type: 'error',
+          text: importResult.error,
+        })
+        return
+      }
+
+      if (importResult.importedCount === 0) {
+        setMessage({
+          type: 'error',
+          text: `有効な単語がありませんでした。スキップ: ${importResult.skippedCount}行`,
+        })
+        return
+      }
+
+      const shouldReplace = window.confirm(
+        `${importResult.importedCount}語をインポートします。` +
+          `\nスキップ: ${importResult.skippedCount}行` +
+          '\n\n現在の単語データを置き換え、学習状態と学習記録をクリアします。続行しますか？',
+      )
+
+      if (!shouldReplace) {
+        setMessage({
+          type: 'info',
+          text: 'CSVインポートをキャンセルしました。',
+        })
+        return
+      }
+
+      onVocabularyReplace(importResult.words)
+      setMessage({
+        type: 'success',
+        text: `${importResult.importedCount}語をインポートしました。スキップ: ${importResult.skippedCount}行`,
+      })
+    } catch {
+      setMessage({
+        type: 'error',
+        text: 'CSVファイルを読み込めませんでした。',
+      })
+    } finally {
+      input.value = ''
+    }
+  }
+
+  const handleJsonExport = () => {
+    downloadAppBackup(appSnapshot)
+    setMessage({
+      type: 'success',
+      text: 'バックアップJSONを書き出しました。',
+    })
+  }
+
+  const handleJsonImport = async (event: ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget
+    const file = input.files?.[0]
+
+    if (file === undefined) {
+      return
+    }
+
+    try {
+      const importResult = parseAppBackupJson(await file.text())
+
+      if (!importResult.ok) {
+        setMessage({
+          type: 'error',
+          text: importResult.error,
+        })
+        return
+      }
+
+      const shouldReplace = window.confirm(
+        'バックアップJSONからアプリデータを復元します。' +
+          `\n単語: ${importResult.snapshot.words.length}語` +
+          `\n学習状態: ${importResult.snapshot.learningStates.length}件` +
+          `\n学習記録: ${importResult.snapshot.dailyRecords.length}件` +
+          '\n\n現在のデータは置き換えられます。続行しますか？',
+      )
+
+      if (!shouldReplace) {
+        setMessage({
+          type: 'info',
+          text: 'JSONインポートをキャンセルしました。',
+        })
+        return
+      }
+
+      onAppDataReplace(importResult.snapshot)
+      setMessage({
+        type: 'success',
+        text: 'バックアップJSONから復元しました。',
+      })
+    } catch {
+      setMessage({
+        type: 'error',
+        text: 'JSONファイルを読み込めませんでした。',
+      })
+    } finally {
+      input.value = ''
+    }
+  }
+
+  const handleResetAllData = () => {
+    const shouldReset = window.confirm(
+      '全データをリセットします。単語、学習状態、学習記録、設定が初期化されます。続行しますか？',
+    )
+
+    if (!shouldReset) {
+      setMessage({
+        type: 'info',
+        text: 'リセットをキャンセルしました。',
+      })
+      return
+    }
+
+    onResetAllData()
+    setMessage({
+      type: 'success',
+      text: '全データをリセットし、サンプル単語を再登録しました。',
     })
   }
 
@@ -24,11 +185,19 @@ export function SettingsPage({
       <section className="settings-heading">
         <h1>設定</h1>
         <p className="muted-text">学習目標とデータ管理</p>
+        {message !== null ? (
+          <p
+            className={`settings-message settings-message--${message.type}`}
+            role={message.type === 'error' ? 'alert' : 'status'}
+          >
+            {message.text}
+          </p>
+        ) : null}
       </section>
 
-      <section className="panel">
+      <section className="panel settings-section">
         <div className="section-heading">
-          <h2>目標スコア</h2>
+          <h2>Goal Settings</h2>
           <span>{wordCount} words</span>
         </div>
         <div className="option-list">
@@ -51,39 +220,57 @@ export function SettingsPage({
         </div>
       </section>
 
-      <section className="panel">
-        <h2>データ管理</h2>
+      <section className="panel settings-section">
+        <div className="section-heading">
+          <h2>Vocabulary Import</h2>
+          <span>CSV</span>
+        </div>
+        <p className="muted-text">
+          必須カラム: word, meaning, partOfSpeech, section
+        </p>
+        <label className="file-picker">
+          <span>
+            <strong>CSVファイルを選択</strong>
+            <small>既存の単語と学習記録は確認後に置き換えます。</small>
+          </span>
+          <input
+            accept=".csv,text/csv"
+            onChange={handleCsvImport}
+            type="file"
+          />
+        </label>
+      </section>
+
+      <section className="panel settings-section">
+        <div className="section-heading">
+          <h2>Backup / Restore</h2>
+          <span>JSON</span>
+        </div>
         <div className="action-list">
-          <button
-            aria-label="CSVインポートは後続マイルストーンで実装します"
-            className="action-row"
-            disabled
-            type="button"
-          >
-            CSVインポート
-          </button>
-          <button
-            aria-label="JSONエクスポートは後続マイルストーンで実装します"
-            className="action-row"
-            disabled
-            type="button"
-          >
-            JSONエクスポート
-          </button>
-          <button
-            aria-label="JSONインポートは後続マイルストーンで実装します"
-            className="action-row"
-            disabled
-            type="button"
-          >
-            JSONインポート
+          <button className="action-row" onClick={handleJsonExport} type="button">
+            <span>データをエクスポート</span>
+            <span aria-hidden="true">›</span>
           </button>
         </div>
+        <label className="file-picker">
+          <span>
+            <strong>JSONバックアップをインポート</strong>
+            <small>有効なバックアップだけ復元できます。</small>
+          </span>
+          <input
+            accept=".json,application/json"
+            onChange={handleJsonImport}
+            type="file"
+          />
+        </label>
       </section>
 
       <section className="danger-panel">
-        <h2>危険な操作</h2>
-        <button className="danger-button" disabled type="button">
+        <div>
+          <h2>Danger Zone</h2>
+          <p className="muted-text">初期状態に戻してサンプル単語を再登録します。</p>
+        </div>
+        <button className="danger-button" onClick={handleResetAllData} type="button">
           全データをリセット
         </button>
       </section>

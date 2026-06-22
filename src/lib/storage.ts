@@ -105,3 +105,19 @@ export function loadSettings(
 export function saveSettings(settings: AppSettings): void {
   saveToStorage(STORAGE_KEYS.settings, settings)
 }
+
+export function saveAppStorageSnapshot(snapshot: AppStorageSnapshot): void {
+  saveWords(snapshot.words)
+  saveLearningStates(snapshot.learningStates)
+  saveDailyRecords(snapshot.dailyRecords)
+  saveSettings(snapshot.settings)
+}
+
+export function createResetSnapshot(sampleWords: Word[]): AppStorageSnapshot {
+  return {
+    words: sampleWords,
+    learningStates: [],
+    dailyRecords: [],
+    settings: DEFAULT_SETTINGS,
+  }
+}

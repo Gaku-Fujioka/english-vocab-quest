@@ -18,6 +18,8 @@ import {
   loadLearningStates,
   loadSettings,
   loadOrSeedSampleWords,
+  createResetSnapshot,
+  saveAppStorageSnapshot,
   saveDailyRecords,
   saveLearningStates,
   saveSettings,
@@ -26,6 +28,9 @@ import { HomePage } from './pages/HomePage'
 import { MyPage } from './pages/MyPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { StudyPage } from './pages/StudyPage'
+import type {
+  AppStorageSnapshot,
+} from './lib/storage'
 import type {
   LearningSession,
   NewWordMode,
@@ -166,7 +171,7 @@ function advanceSession(
 
 function App() {
   const [activeTab, setActiveTab] = useState<AppTab>('home')
-  const [words] = useState(() => loadOrSeedSampleWords(sampleWords))
+  const [words, setWords] = useState(() => loadOrSeedSampleWords(sampleWords))
   const [learningStates, setLearningStates] = useState(() =>
     loadLearningStates(),
   )
@@ -177,6 +182,28 @@ function App() {
   const handleSettingsChange = (nextSettings: AppSettings) => {
     setSettings(nextSettings)
     saveSettings(nextSettings)
+  }
+
+  const replaceAppData = (snapshot: AppStorageSnapshot) => {
+    setWords(snapshot.words)
+    setLearningStates(snapshot.learningStates)
+    setDailyRecords(snapshot.dailyRecords)
+    setSettings(snapshot.settings)
+    setSession(null)
+    saveAppStorageSnapshot(snapshot)
+  }
+
+  const handleReplaceVocabulary = (nextWords: Word[]) => {
+    replaceAppData({
+      words: nextWords,
+      learningStates: [],
+      dailyRecords: [],
+      settings,
+    })
+  }
+
+  const handleResetAllData = () => {
+    replaceAppData(createResetSnapshot(sampleWords))
   }
 
   const handleStartStudy = (mode: NewWordMode) => {
@@ -287,7 +314,16 @@ function App() {
       case 'settings':
         return (
           <SettingsPage
+            appSnapshot={{
+              words,
+              learningStates,
+              dailyRecords,
+              settings,
+            }}
+            onAppDataReplace={replaceAppData}
+            onResetAllData={handleResetAllData}
             onSettingsChange={handleSettingsChange}
+            onVocabularyReplace={handleReplaceVocabulary}
             settings={settings}
             wordCount={words.length}
           />
