@@ -1,12 +1,14 @@
 import {
+  getLearningHeatmapDays,
   getLearningStreak,
-  getMasteredCount,
-  getMasteryPercent,
+  getOverallProgress,
+  getSectionProgress,
+  getWeakWordRanking,
 } from '../lib/progress'
 import type { DailyLearningRecord, WordLearningState } from '../types/learning'
 import type { AppSettings } from '../types/settings'
 import type { Word } from '../types/word'
-import { WORD_SECTIONS } from '../types/word'
+import type { CSSProperties } from 'react'
 
 type MyPageProps = {
   dailyRecords: DailyLearningRecord[]
@@ -15,36 +17,20 @@ type MyPageProps = {
   words: Word[]
 }
 
-type WeakWord = {
-  state: WordLearningState
-  word: Word
-}
-
-const isWeakWord = (item: { state: WordLearningState; word: Word | undefined }): item is WeakWord =>
-  item.word !== undefined
-
 export function MyPage({
   dailyRecords,
   learningStates,
   settings,
   words,
 }: MyPageProps) {
-  const masteredIds = new Set(
-    learningStates.filter((state) => state.mastered).map((state) => state.wordId),
-  )
-  const masteredCount = getMasteredCount(learningStates)
-  const masteryPercent = getMasteryPercent(masteredCount, words.length)
+  const overallProgress = getOverallProgress(words, learningStates)
+  const sectionProgress = getSectionProgress(words, learningStates)
+  const weakWords = getWeakWordRanking(words, learningStates)
+  const heatmapDays = getLearningHeatmapDays(dailyRecords)
   const currentStreak = getLearningStreak(dailyRecords)
-  const weakWords = learningStates
-    .filter((state) => state.weakPoint > 0)
-    .sort((firstState, secondState) => secondState.weakPoint - firstState.weakPoint)
-    .slice(0, 10)
-    .map((state) => ({
-      state,
-      word: words.find((word) => word.id === state.wordId),
-    }))
-    .filter(isWeakWord)
-  const activeDates = new Set(dailyRecords.map((record) => record.date))
+  const ringStyle = {
+    '--progress-percent': `${overallProgress.percent}%`,
+  } as CSSProperties
 
   return (
     <div className="page page-mypage">
@@ -55,88 +41,139 @@ export function MyPage({
         <div>
           <p className="eyebrow">学習進捗</p>
           <h1>目標 TOEIC {settings.targetScore}</h1>
-          <p className="muted-text">{masteredCount} words mastered</p>
+          <p className="muted-text">
+            {overallProgress.masteredCount} / {overallProgress.totalWordCount} words
+          </p>
         </div>
-        <div className="ring-progress">{masteryPercent}%</div>
+        <div className="ring-progress" style={ringStyle}>
+          {overallProgress.percent}%
+        </div>
       </section>
 
       <section className="score-row" aria-label="学習サマリー">
         <article>
           <span>総習得</span>
-          <strong>{masteredCount}</strong>
+          <strong>{overallProgress.masteredCount}</strong>
+        </article>
+        <article>
+          <span>登録単語</span>
+          <strong>{overallProgress.totalWordCount}</strong>
         </article>
         <article>
           <span>連続日数</span>
           <strong>{currentStreak} Days</strong>
         </article>
+        <article>
+          <span>習得率</span>
+          <strong>{overallProgress.percent}%</strong>
+        </article>
+      </section>
+
+      <section className="panel progress-panel">
+        <div className="section-heading">
+          <h2>全体の習得度</h2>
+          <span>
+            {overallProgress.masteredCount} / {overallProgress.totalWordCount}
+          </span>
+        </div>
+        <div
+          className="progress-track"
+          aria-label={`全体の習得率 ${overallProgress.percent}%`}
+        >
+          <span style={{ width: `${overallProgress.percent}%` }} />
+        </div>
+        <p className="muted-text">
+          登録済みの単語に対して、習得済みになった単語の割合です。
+        </p>
       </section>
 
       <section className="panel">
         <div className="section-heading">
-          <h2>レベル別進捗</h2>
-          <span>{masteredCount} / {words.length}</span>
+          <h2>Section Progress</h2>
+          <span>{overallProgress.percent}% total</span>
         </div>
         <div className="section-list">
-          {WORD_SECTIONS.map((section) => {
-            const sectionWords = words.filter((word) => word.section === section)
-            const sectionMastered = sectionWords.filter((word) =>
-              masteredIds.has(word.id),
-            ).length
-            const sectionPercent =
-              sectionWords.length === 0
-                ? 0
-                : Math.round((sectionMastered / sectionWords.length) * 100)
-
-            return (
-              <div className="section-progress" key={section}>
+          {sectionProgress.map((section) => (
+              <div className="section-progress" key={section.section}>
                 <div>
-                  <strong>{section}点レベル</strong>
-                  <span>{sectionMastered} / {sectionWords.length}</span>
+                  <strong>{section.section} Level</strong>
+                  <span>
+                    {section.masteredCount} / {section.totalWordCount} ·{' '}
+                    {section.percent}%
+                  </span>
                 </div>
-                <div className="progress-track progress-track--mini">
-                  <span style={{ width: `${sectionPercent}%` }} />
+                <div
+                  className="progress-track progress-track--mini"
+                  aria-label={`${section.section} Level ${section.percent}%`}
+                >
+                  <span style={{ width: `${section.percent}%` }} />
                 </div>
               </div>
-            )
-          })}
+            ))}
         </div>
       </section>
 
       <section className="panel">
         <div className="section-heading">
-          <h2>優先復習単語</h2>
+          <h2>Weak Word Ranking</h2>
+          <span>Top 10</span>
         </div>
         {weakWords.length > 0 ? (
           <div className="weak-list">
             {weakWords.map((item) => (
               <article className="weak-card" key={item.word.id}>
+                <span className="weak-card__rank">{item.rank}</span>
                 <div>
                   <strong>{item.word.word}</strong>
-                  <span>{item.word.meaning}</span>
+                  <span>
+                    {item.word.meaning} · {item.word.partOfSpeech}
+                  </span>
                 </div>
-                <span>{item.state.weakPoint}</span>
+                <span className="weak-card__score">{item.weakPoint}</span>
               </article>
             ))}
           </div>
         ) : (
-          <p className="muted-text">まだ弱点単語はありません。</p>
+          <p className="muted-text">
+            No weak words yet. Keep studying to discover what needs review.
+          </p>
         )}
       </section>
 
       <section className="panel">
-        <h2>学習記録</h2>
-        <div className="heatmap" aria-label="学習記録">
-          {Array.from({ length: 42 }, (_, index) => {
-            const cellDate = `day-${index + 1}`
-            const hasActivity = activeDates.has(cellDate)
+        <div className="section-heading">
+          <h2>Learning Heatmap</h2>
+          <span>365 days</span>
+        </div>
+        <div className="heatmap-scroller">
+          <div className="heatmap" aria-label="365日間の学習記録" role="list">
+            {heatmapDays.map((day) => {
+              const label = `${day.date}: ${day.studyCount} words studied`
 
-            return (
-              <span
-                className={hasActivity ? 'heatmap-cell is-active' : 'heatmap-cell'}
-                key={cellDate}
-              />
-            )
-          })}
+              return (
+                <span
+                  aria-label={label}
+                  className="heatmap-cell"
+                  data-level={day.level}
+                  key={day.date}
+                  role="listitem"
+                  title={label}
+                />
+              )
+            })}
+          </div>
+        </div>
+        <div className="heatmap-legend" aria-label="学習量の凡例">
+          <span>Less</span>
+          {[0, 1, 2, 3, 4].map((level) => (
+            <span
+              aria-hidden="true"
+              className="heatmap-cell heatmap-cell--legend"
+              data-level={level}
+              key={level}
+            />
+          ))}
+          <span>More</span>
         </div>
       </section>
     </div>
