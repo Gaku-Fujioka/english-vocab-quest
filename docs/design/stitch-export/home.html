@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VocabMaster - Home</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&amp;family=Inter:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed-dim": "#a9c7ff",
+                    "tertiary": "#755b00",
+                    "surface": "#f9f9f9",
+                    "primary-fixed-dim": "#6be026",
+                    "on-primary": "#ffffff",
+                    "surface-variant": "#e2e2e2",
+                    "on-primary-fixed-variant": "#1f5100",
+                    "outline": "#6f7b64",
+                    "error": "#ba1a1a",
+                    "secondary-fixed": "#d6e3ff",
+                    "primary-container": "#58cc02",
+                    "tertiary-fixed-dim": "#f4bf00",
+                    "surface-dim": "#dadada",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-fixed": "#241a00",
+                    "on-error-container": "#93000a",
+                    "surface-bright": "#f9f9f9",
+                    "surface-container-high": "#e8e8e8",
+                    "secondary": "#005db7",
+                    "on-primary-container": "#1e5000",
+                    "secondary-container": "#4b96ff",
+                    "background": "#f9f9f9",
+                    "surface-container": "#eeeeee",
+                    "surface-container-highest": "#e2e2e2",
+                    "outline-variant": "#becbb1",
+                    "on-secondary-container": "#002e5f",
+                    "on-tertiary-container": "#574300",
+                    "inverse-surface": "#2f3131",
+                    "primary": "#2b6c00",
+                    "surface-container-lowest": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "on-error": "#ffffff",
+                    "on-secondary-fixed": "#001b3d",
+                    "surface-tint": "#2b6c00",
+                    "surface-container-low": "#f3f3f3",
+                    "on-secondary-fixed-variant": "#00468c",
+                    "tertiary-container": "#ddad00",
+                    "on-surface": "#1a1c1c",
+                    "on-background": "#1a1c1c",
+                    "on-tertiary-fixed-variant": "#594400",
+                    "on-surface-variant": "#3f4a36",
+                    "tertiary-fixed": "#ffdf92",
+                    "inverse-primary": "#6be026",
+                    "inverse-on-surface": "#f1f1f1",
+                    "primary-fixed": "#87fe45",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-fixed": "#082100"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "8px",
+                    "xl": "32px",
+                    "lg": "24px",
+                    "safe-margin": "20px",
+                    "md": "16px",
+                    "sm": "12px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "body-md": [
+                            "Inter"
+                    ],
+                    "body-lg": [
+                            "Inter"
+                    ],
+                    "label-sm": [
+                            "Inter"
+                    ],
+                    "headline-md-mobile": [
+                            "Geist"
+                    ],
+                    "headline-md": [
+                            "Geist"
+                    ],
+                    "label-bold": [
+                            "Geist"
+                    ],
+                    "display-lg": [
+                            "Geist"
+                    ]
+            },
+            "fontSize": {
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "body-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-sm": [
+                            "12px",
+                            {
+                                    "lineHeight": "16px",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "headline-md-mobile": [
+                            "20px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-md": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "letterSpacing": "-0.01em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "label-bold": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "letterSpacing": "0.02em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "display-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "700"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        .squishy-btn {
+            box-shadow: 0 4px 0 theme('colors.primary');
+            transform: translateY(0);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .squishy-btn:active {
+            box-shadow: 0 0 0 theme('colors.primary');
+            transform: translateY(4px);
+        }
+        .level-1-shadow {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+        }
+        .progress-track {
+            background: theme('colors.surface-variant');
+        }
+        .progress-fill {
+            background: theme('colors.primary-container');
+            transition: width 1s cubic-bezier(0.5, 0.3, 0.5, 1.2);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background pb-24 md:pb-0 h-screen overflow-hidden flex flex-col md:flex-row">
+<!-- TopAppBar for Mobile / Hidden on md -->
+<header class="md:hidden flex justify-between items-center w-full px-safe-margin py-md bg-surface shadow-sm z-10 sticky top-0">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary-container text-2xl">local_fire_department</span>
+<span class="font-display-lg text-display-lg font-bold text-primary">VocabMaster</span>
+</div>
+<button class="hover:opacity-80 transition-opacity active:scale-95 transition-transform text-on-surface-variant">
+<span class="material-symbols-outlined text-2xl">notifications</span>
+</button>
+</header>
+<!-- SideNav for Web / Hidden on Mobile -->
+<nav class="hidden md:flex flex-col w-64 bg-surface shadow-lg h-full sticky top-0 z-20">
+<div class="p-xl flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary-container text-3xl">local_fire_department</span>
+<span class="font-display-lg text-display-lg font-bold text-primary">VocabMaster</span>
+</div>
+<div class="flex-1 flex flex-col gap-sm px-md mt-lg">
+<a class="flex items-center gap-md px-md py-sm rounded-lg bg-surface-container text-primary font-label-bold text-label-bold" href="#">
+<span class="material-symbols-outlined">home</span>
+                 ホーム
+             </a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors font-label-bold text-label-bold" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+                 学習
+             </a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors font-label-bold text-label-bold" href="#">
+<span class="material-symbols-outlined">person</span>
+                 マイページ
+             </a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors font-label-bold text-label-bold mt-auto mb-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+                 設定
+             </a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-y-auto px-safe-margin py-lg md:p-xl flex flex-col gap-lg md:gap-xl max-w-4xl mx-auto w-full">
+<!-- Welcome & Streak Section -->
+<section class="flex justify-between items-end">
+<div>
+<h1 class="font-headline-md-mobile text-headline-md-mobile md:font-headline-md md:text-headline-md text-on-surface">おかえりなさい！</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">新しい単語をマスターしましょう</p>
+</div>
+<div class="flex items-center gap-xs bg-tertiary-fixed px-sm py-xs rounded-full shadow-sm">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="font-label-bold text-label-bold text-on-tertiary-fixed">17日連続</span>
+</div>
+</section>
+<!-- Today's Progress Card -->
+<section class="bg-surface rounded-xl p-md border border-surface-variant level-1-shadow relative overflow-hidden">
+<!-- Decorative background element -->
+<div class="absolute -right-10 -top-10 w-32 h-32 bg-primary-fixed rounded-full opacity-20 blur-2xl pointer-events-none"></div>
+<div class="relative z-10">
+<div class="flex justify-between items-center mb-md">
+<h2 class="font-headline-md-mobile text-headline-md-mobile text-on-surface">今日の進捗</h2>
+<span class="font-label-bold text-label-bold text-primary">60%</span>
+</div>
+<div class="h-3 rounded-full progress-track overflow-hidden mb-sm">
+<div class="h-full progress-fill rounded-full" style="width: 60%;"></div>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant text-right">残り18単語</p>
+<button class="mt-lg w-full bg-primary-container text-on-primary-container font-label-bold text-label-bold py-md rounded-xl squishy-btn flex justify-center items-center gap-sm">
+<span class="material-symbols-outlined">play_arrow</span>
+                     学習を開始する
+                 </button>
+</div>
+</section>
+<!-- Bento Grid Stats -->
+<section class="grid grid-cols-2 gap-md">
+<!-- Review Count -->
+<div class="bg-surface rounded-xl p-md border border-surface-variant level-1-shadow flex flex-col justify-between aspect-square">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-error text-2xl p-sm bg-error-container rounded-lg">history_edu</span>
+</div>
+<div>
+<p class="font-display-lg text-display-lg font-bold text-on-surface">18</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">今日の復習</p>
+</div>
+</div>
+<!-- Mastered Words -->
+<div class="bg-surface rounded-xl p-md border border-surface-variant level-1-shadow flex flex-col justify-between aspect-square">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary text-2xl p-sm bg-primary-fixed rounded-lg">military_tech</span>
+</div>
+<div>
+<p class="font-display-lg text-display-lg font-bold text-on-surface">421</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">習得した単語</p>
+</div>
+</div>
+</section>
+<!-- Overall Mastery -->
+<section class="bg-surface rounded-xl p-md border border-surface-variant level-1-shadow flex items-center gap-md">
+<div class="relative w-16 h-16 flex-shrink-0">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="100, 100" stroke-width="3"></path>
+<path class="text-secondary-container" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="35, 100" stroke-width="3"></path>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center font-label-bold text-label-bold text-secondary">
+                    35%
+                </div>
+</div>
+<div>
+<h3 class="font-label-bold text-label-bold text-on-surface">全体の習得度</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">着実に語彙力がついています。その調子です！</p>
+</div>
+</section>
+<!-- Spacer for mobile scroll -->
+<div class="h-8 md:hidden"></div>
+</main>
+<!-- BottomNavBar for Mobile / Hidden on md -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-safe-margin py-xs pb-8 bg-surface shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-primary font-label-bold text-label-bold active:translate-y-[2px] transition-all duration-150 py-sm px-md rounded-lg hover:bg-surface-container" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+            ホーム
+        </a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant font-label-sm text-label-sm active:translate-y-[2px] transition-all duration-150 py-sm px-md rounded-lg hover:bg-surface-container" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+            学習
+        </a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant font-label-sm text-label-sm active:translate-y-[2px] transition-all duration-150 py-sm px-md rounded-lg hover:bg-surface-container" href="#">
+<span class="material-symbols-outlined">person</span>
+            マイページ
+        </a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant font-label-sm text-label-sm active:translate-y-[2px] transition-all duration-150 py-sm px-md rounded-lg hover:bg-surface-container" href="#">
+<span class="material-symbols-outlined">settings</span>
+            設定
+        </a>
+</nav>
+<script>
+        // Trigger progress bar animation on load
+        document.addEventListener("DOMContentLoaded", () => {
+            const fills = document.querySelectorAll('.progress-fill');
+            fills.forEach(fill => {
+                const width = fill.style.width;
+                fill.style.width = '0%';
+                setTimeout(() => {
+                    fill.style.width = width;
+                }, 100);
+            });
+        });
+    </script>
+</body></html>

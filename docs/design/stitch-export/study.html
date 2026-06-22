@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html lang="ja"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VocabFlow - Study Mode</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-fixed-dim": "#a9c7ff",
+                        "tertiary": "#755b00",
+                        "surface": "#f9f9f9",
+                        "primary-fixed-dim": "#6be026",
+                        "on-primary": "#ffffff",
+                        "surface-variant": "#e2e2e2",
+                        "on-primary-fixed-variant": "#1f5100",
+                        "outline": "#6f7b64",
+                        "error": "#ba1a1a",
+                        "secondary-fixed": "#d6e3ff",
+                        "primary-container": "#58cc02",
+                        "tertiary-fixed-dim": "#f4bf00",
+                        "surface-dim": "#dadada",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed": "#241a00",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#f9f9f9",
+                        "surface-container-high": "#e8e8e8",
+                        "secondary": "#005db7",
+                        "on-primary-container": "#1e5000",
+                        "secondary-container": "#4b96ff",
+                        "background": "#f9f9f9",
+                        "surface-container": "#eeeeee",
+                        "surface-container-highest": "#e2e2e2",
+                        "outline-variant": "#becbb1",
+                        "on-secondary-container": "#002e5f",
+                        "on-tertiary-container": "#574300",
+                        "inverse-surface": "#2f3131",
+                        "primary": "#2b6c00",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed": "#001b3d",
+                        "surface-tint": "#2b6c00",
+                        "surface-container-low": "#f3f3f3",
+                        "on-secondary-fixed-variant": "#00468c",
+                        "tertiary-container": "#ddad00",
+                        "on-surface": "#1a1c1c",
+                        "on-background": "#1a1c1c",
+                        "on-tertiary-fixed-variant": "#594400",
+                        "on-surface-variant": "#3f4a36",
+                        "tertiary-fixed": "#ffdf92",
+                        "inverse-primary": "#6be026",
+                        "inverse-on-surface": "#f1f1f1",
+                        "primary-fixed": "#87fe45",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#082100"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "xs": "8px",
+                        "sm": "12px",
+                        "md": "16px",
+                        "safe-margin": "20px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "2xl": "48px",
+                        "base": "4px"
+                    },
+                    fontFamily: {
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-md-mobile": ["Geist"],
+                        "headline-md": ["Geist"],
+                        "label-bold": ["Geist"],
+                        "display-lg": ["Geist"]
+                    },
+                    fontSize: {
+                        "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+                        "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+                        "label-sm": ["12px", { lineHeight: "16px", fontWeight: "500" }],
+                        "headline-md-mobile": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+                        "headline-md": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "600" }],
+                        "label-bold": ["14px", { lineHeight: "20px", letterSpacing: "0.02em", fontWeight: "600" }],
+                        "display-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }]
+                    },
+                    boxShadow: {
+                        'soft-1': '0 4px 8px -2px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.02)',
+                        '3d-primary': '0 6px 0 0 theme("colors.on-primary-fixed-variant")',
+                        '3d-secondary': '0 6px 0 0 theme("colors.secondary")',
+                        '3d-tertiary': '0 6px 0 0 theme("colors.tertiary")',
+                        '3d-error': '0 6px 0 0 theme("colors.on-error-container")',
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Spring animation for progress bar */
+        @keyframes springProgress {
+            0% { width: 40%; }
+            50% { width: 55%; }
+            70% { width: 48%; }
+            100% { width: 50%; }
+        }
+        .animate-progress {
+            animation: springProgress 0.8s cubic-bezier(0.5, 0.3, 0.5, 1.2) forwards;
+        }
+
+        /* Card reveal animation */
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-reveal {
+            animation: slideUpFade 0.4s ease-out forwards;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface h-screen w-full flex flex-col overflow-hidden font-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Focus Mode Header: Minimalist Progress Only -->
+<header class="w-full pt-safe-margin px-safe-margin flex flex-col gap-xs z-10">
+<div class="flex justify-between items-center px-1 opacity-70">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">local_fire_department</span>
+                学習セッション
+            </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">12 / 24</span>
+</div>
+<!-- Gamified Progress Bar (12px thick) -->
+<div class="h-3 w-full bg-surface-container-high rounded-full overflow-hidden shadow-inner">
+<div class="h-full bg-primary rounded-full animate-progress relative overflow-hidden">
+<!-- Glossy highlight on progress bar -->
+<div class="absolute top-0 left-0 right-0 h-1/2 bg-white/20"></div>
+</div>
+</div>
+</header>
+<!-- Main Canvas: Flashcard Area -->
+<main class="flex-grow flex flex-col justify-center items-center px-safe-margin pb-safe-margin relative z-0 w-full max-w-md mx-auto">
+<!-- Flashcard Container -->
+<div class="w-full bg-surface-container-lowest rounded-3xl shadow-soft-1 border border-surface-variant p-xl flex flex-col items-center justify-between min-h-[400px] relative overflow-hidden animate-reveal">
+<!-- Card Front Content (Target Word) -->
+<div class="flex flex-col items-center text-center mt-lg mb-2xl">
+<h1 class="font-display-lg text-display-lg text-on-surface mb-xs tracking-tight">inventory</h1>
+<button aria-label="Play pronunciation" class="text-outline hover:text-primary transition-colors p-2 rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined filled text-2xl">volume_up</span>
+</button>
+</div>
+<!-- Divider -->
+<div class="w-16 h-1 bg-surface-container-high rounded-full my-md"></div>
+<!-- Card Back Content (Revealed State) -->
+<div class="flex flex-col items-center text-center w-full animate-reveal" style="animation-delay: 0.1s;">
+<!-- Meaning -->
+<div class="mb-sm">
+<span class="font-headline-md text-headline-md text-primary">在庫</span>
+</div>
+<!-- Part of Speech Badge -->
+<div class="bg-surface-container-low border border-surface-variant px-sm py-1 rounded-lg mb-lg">
+<span class="font-label-sm text-label-sm text-outline tracking-wide uppercase">名詞</span>
+</div>
+<!-- Mastery Status Indicator -->
+<div class="flex items-center gap-xs bg-surface-container px-md py-sm rounded-xl w-full justify-center">
+<div class="flex -space-x-1">
+<span class="material-symbols-outlined text-[18px] text-surface-variant filled">star</span>
+<span class="material-symbols-outlined text-[18px] text-surface-variant filled">star</span>
+<span class="material-symbols-outlined text-[18px] text-primary filled">star</span>
+</div>
+<span class="font-body-md text-[14px] text-on-surface-variant ml-1">習得まであと2回の「完璧」が必要</span>
+</div>
+</div>
+<!-- Subtle background texture/pattern for card -->
+<div class="absolute top-0 right-0 -mt-16 -mr-16 w-48 h-48 bg-primary-container rounded-full opacity-5 blur-3xl pointer-events-none"></div>
+<div class="absolute bottom-0 left-0 -mb-16 -ml-16 w-48 h-48 bg-secondary-container rounded-full opacity-5 blur-3xl pointer-events-none"></div>
+</div>
+</main>
+<!-- Bottom Action Area: 3D Gamified Buttons -->
+<footer class="w-full px-safe-margin pb-xl pt-xs z-10 bg-gradient-to-t from-surface via-surface to-transparent">
+<div class="w-full max-w-md mx-auto grid grid-cols-2 gap-x-md gap-y-lg">
+<!-- Unsure Button -->
+<button class="relative group outline-none">
+<div class="w-full h-14 bg-surface-container-highest text-on-surface border-2 border-surface-variant rounded-2xl font-label-bold text-label-bold flex items-center justify-center transition-all duration-150 shadow-[0_6px_0_0_theme(colors.surface-variant)] active:shadow-[0_0px_0_0_theme(colors.surface-variant)] active:translate-y-[6px]">
+<span class="material-symbols-outlined mr-2 text-[18px]">help</span>
+                    不安
+                </div>
+</button>
+<!-- Didn't Know Button -->
+<button class="relative group outline-none">
+<div class="w-full h-14 bg-error-container text-on-error-container rounded-2xl font-label-bold text-label-bold flex items-center justify-center transition-all duration-150 shadow-3d-error active:shadow-[0_0px_0_0_theme(colors.on-error-container)] active:translate-y-[6px]">
+<span class="material-symbols-outlined mr-2 text-[18px]">close</span>
+                    わからない
+                </div>
+</button>
+<!-- Knew It Button -->
+<button class="relative group outline-none">
+<div class="w-full h-14 bg-secondary-container text-on-secondary-container rounded-2xl font-label-bold text-label-bold flex items-center justify-center transition-all duration-150 shadow-3d-secondary active:shadow-[0_0px_0_0_theme(colors.secondary)] active:translate-y-[6px]">
+<span class="material-symbols-outlined mr-2 text-[18px]">thumb_up</span>
+                    覚えている
+                </div>
+</button>
+<!-- Perfect Button (Primary Accent) -->
+<button class="relative group outline-none">
+<div class="w-full h-14 bg-primary text-on-primary rounded-2xl font-label-bold text-label-bold flex items-center justify-center transition-all duration-150 shadow-3d-primary active:shadow-[0_0px_0_0_theme(colors.on-primary-fixed-variant)] active:translate-y-[6px]">
+<span class="material-symbols-outlined mr-2 text-[18px]">star</span>
+                    完璧
+                </div>
+</button>
+</div>
+</footer>
+</body></html>

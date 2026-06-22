@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>VocabMaster - 設定</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Geist:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed-dim": "#a9c7ff",
+                      "tertiary": "#755b00",
+                      "surface": "#f9f9f9",
+                      "primary-fixed-dim": "#6be026",
+                      "on-primary": "#ffffff",
+                      "surface-variant": "#e2e2e2",
+                      "on-primary-fixed-variant": "#1f5100",
+                      "outline": "#6f7b64",
+                      "error": "#ba1a1a",
+                      "secondary-fixed": "#d6e3ff",
+                      "primary-container": "#58cc02",
+                      "tertiary-fixed-dim": "#f4bf00",
+                      "surface-dim": "#dadada",
+                      "on-secondary": "#ffffff",
+                      "on-tertiary-fixed": "#241a00",
+                      "on-error-container": "#93000a",
+                      "surface-bright": "#f9f9f9",
+                      "surface-container-high": "#e8e8e8",
+                      "secondary": "#005db7",
+                      "on-primary-container": "#1e5000",
+                      "secondary-container": "#4b96ff",
+                      "background": "#f9f9f9",
+                      "surface-container": "#eeeeee",
+                      "surface-container-highest": "#e2e2e2",
+                      "outline-variant": "#becbb1",
+                      "on-secondary-container": "#002e5f",
+                      "on-tertiary-container": "#574300",
+                      "inverse-surface": "#2f3131",
+                      "primary": "#2b6c00",
+                      "surface-container-lowest": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "on-error": "#ffffff",
+                      "on-secondary-fixed": "#001b3d",
+                      "surface-tint": "#2b6c00",
+                      "surface-container-low": "#f3f3f3",
+                      "on-secondary-fixed-variant": "#00468c",
+                      "tertiary-container": "#ddad00",
+                      "on-surface": "#1a1c1c",
+                      "on-background": "#1a1c1c",
+                      "on-tertiary-fixed-variant": "#594400",
+                      "on-surface-variant": "#3f4a36",
+                      "tertiary-fixed": "#ffdf92",
+                      "inverse-primary": "#6be026",
+                      "inverse-on-surface": "#f1f1f1",
+                      "primary-fixed": "#87fe45",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed": "#082100"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "8px",
+                      "xl": "32px",
+                      "lg": "24px",
+                      "safe-margin": "20px",
+                      "md": "16px",
+                      "sm": "12px",
+                      "base": "4px"
+              },
+              "fontFamily": {
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "headline-md-mobile": [
+                              "Geist"
+                      ],
+                      "headline-md": [
+                              "Geist"
+                      ],
+                      "label-bold": [
+                              "Geist"
+                      ],
+                      "display-lg": [
+                              "Geist"
+                      ]
+              },
+              "fontSize": {
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-md-mobile": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-bold": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Squishy Button Animation */
+        .btn-squish {
+            transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-squish:active {
+            transform: translateY(2px);
+            box-shadow: none !important;
+        }
+
+        /* Tonal Shadows */
+        .shadow-level-1 {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #E5E5E5;
+        }
+
+        /* Custom Radio */
+        input[type="radio"] {
+            accent-color: #2b6c00;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-safe-margin py-md bg-surface dark:bg-surface-dim docked full-width top-0 sticky z-40">
+<button aria-label="Menu" class="text-on-surface-variant dark:text-outline hover:opacity-80 transition-opacity active:scale-95 transition-transform flex items-center justify-center w-10 h-10 rounded-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">local_fire_department</span>
+</button>
+<h1 class="font-display-lg text-display-lg font-bold text-primary dark:text-primary-fixed-dim tracking-tight">VocabMaster</h1>
+<button aria-label="Notifications" class="text-on-surface-variant dark:text-outline hover:opacity-80 transition-opacity active:scale-95 transition-transform flex items-center justify-center w-10 h-10 rounded-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-2xl mx-auto px-safe-margin pt-lg pb-xl space-y-xl">
+<!-- Header -->
+<div class="space-y-xs">
+<h2 class="font-headline-md-mobile text-headline-md-mobile md:font-headline-md md:text-headline-md text-on-surface">設定</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">学習目標とデータの管理</p>
+</div>
+<!-- Goal Settings -->
+<section class="space-y-md">
+<h3 class="font-label-bold text-label-bold text-outline uppercase tracking-wider">目標スコア</h3>
+<div class="bg-surface-lowest rounded-xl shadow-level-1 overflow-hidden divide-y divide-surface-variant">
+<label class="flex items-center justify-between p-md cursor-pointer hover:bg-surface-container-low transition-colors group">
+<div class="flex flex-col">
+<span class="font-body-lg text-body-lg text-on-surface font-medium group-hover:text-primary transition-colors">TOEIC 600</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">初級</span>
+</div>
+<input class="w-5 h-5 border-outline focus:ring-primary focus:ring-2" name="toeic_goal" type="radio" value="600"/>
+</label>
+<label class="flex items-center justify-between p-md cursor-pointer hover:bg-surface-container-low transition-colors group">
+<div class="flex flex-col">
+<span class="font-body-lg text-body-lg text-on-surface font-medium group-hover:text-primary transition-colors">TOEIC 730</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">中級</span>
+</div>
+<input checked="" class="w-5 h-5 border-outline focus:ring-primary focus:ring-2" name="toeic_goal" type="radio" value="730"/>
+</label>
+<label class="flex items-center justify-between p-md cursor-pointer hover:bg-surface-container-low transition-colors group">
+<div class="flex flex-col">
+<span class="font-body-lg text-body-lg text-on-surface font-medium group-hover:text-primary transition-colors">TOEIC 850</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">上級</span>
+</div>
+<input class="w-5 h-5 border-outline focus:ring-primary focus:ring-2" name="toeic_goal" type="radio" value="850"/>
+</label>
+<label class="flex items-center justify-between p-md cursor-pointer hover:bg-surface-container-low transition-colors group">
+<div class="flex flex-col">
+<span class="font-body-lg text-body-lg text-on-surface font-medium group-hover:text-primary transition-colors">TOEIC 950</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">マスター</span>
+</div>
+<input class="w-5 h-5 border-outline focus:ring-primary focus:ring-2" name="toeic_goal" type="radio" value="950"/>
+</label>
+</div>
+</section>
+<!-- Data Management -->
+<section class="space-y-md">
+<h3 class="font-label-bold text-label-bold text-outline uppercase tracking-wider">データ管理</h3>
+<div class="bg-surface-lowest rounded-xl shadow-level-1 overflow-hidden divide-y divide-surface-variant">
+<button class="w-full flex items-center justify-between p-md hover:bg-surface-container-low transition-colors text-left active:bg-surface-container">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 0;">download</span>
+<span class="font-body-lg text-body-lg text-on-surface font-medium">データをエクスポート</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-md hover:bg-surface-container-low transition-colors text-left active:bg-surface-container">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 0;">upload</span>
+<span class="font-body-lg text-body-lg text-on-surface font-medium">データをインポート</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- Danger Zone -->
+<section class="space-y-md pt-lg">
+<h3 class="font-label-bold text-label-bold text-error uppercase tracking-wider">危険な操作</h3>
+<div class="bg-error-container rounded-xl shadow-level-1 p-md flex flex-col sm:flex-row sm:items-center justify-between gap-md border border-error/20">
+<div class="flex flex-col">
+<span class="font-body-lg text-body-lg text-on-error-container font-semibold">全データをリセット</span>
+<span class="font-label-sm text-label-sm text-on-error-container/80">この操作は取り消せません。</span>
+</div>
+<button class="btn-squish bg-error text-on-error px-lg py-sm rounded-lg font-label-bold text-label-bold shadow-[0_4px_0_0_#93000a] w-full sm:w-auto text-center">
+                    リセットする
+                </button>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-safe-margin py-xs pb-8 md:pb-xs bg-surface dark:bg-surface-container-low shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline font-label-sm text-label-sm hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors active:translate-y-[2px] duration-150 p-2 rounded-lg w-16" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">home</span>
+<span>ホーム</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline font-label-sm text-label-sm hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors active:translate-y-[2px] duration-150 p-2 rounded-lg w-16" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">menu_book</span>
+<span>学習</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline font-label-sm text-label-sm hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors active:translate-y-[2px] duration-150 p-2 rounded-lg w-16" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">person</span>
+<span>マイページ</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-inverse-primary font-label-bold text-label-bold hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors active:translate-y-[2px] duration-150 p-2 rounded-lg w-16 relative" href="#">
+<span class="material-symbols-outlined mb-1 text-primary" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="text-primary">設定</span>
+<div class="absolute -bottom-1 w-1 h-1 rounded-full bg-primary"></div>
+</a>
+</nav>
+<script>
+        // Simple script to handle radio button visual updates if needed, 
+        // though CSS handles most of the state styling via :checked and group-hover
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                // Remove active styling from all rows if we wanted a background color change
+                // Currently relying on native radio button and simple group hover
+            });
+        });
+    </script>
+</body></html>
