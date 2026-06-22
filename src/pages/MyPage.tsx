@@ -1,3 +1,8 @@
+import {
+  getLearningStreak,
+  getMasteredCount,
+  getMasteryPercent,
+} from '../lib/progress'
 import type { DailyLearningRecord, WordLearningState } from '../types/learning'
 import type { AppSettings } from '../types/settings'
 import type { Word } from '../types/word'
@@ -27,13 +32,13 @@ export function MyPage({
   const masteredIds = new Set(
     learningStates.filter((state) => state.mastered).map((state) => state.wordId),
   )
-  const masteredCount = masteredIds.size
-  const masteryPercent =
-    words.length === 0 ? 0 : Math.round((masteredCount / words.length) * 100)
+  const masteredCount = getMasteredCount(learningStates)
+  const masteryPercent = getMasteryPercent(masteredCount, words.length)
+  const currentStreak = getLearningStreak(dailyRecords)
   const weakWords = learningStates
     .filter((state) => state.weakPoint > 0)
     .sort((firstState, secondState) => secondState.weakPoint - firstState.weakPoint)
-    .slice(0, 3)
+    .slice(0, 10)
     .map((state) => ({
       state,
       word: words.find((word) => word.id === state.wordId),
@@ -62,7 +67,7 @@ export function MyPage({
         </article>
         <article>
           <span>連続日数</span>
-          <strong>0 Days</strong>
+          <strong>{currentStreak} Days</strong>
         </article>
       </section>
 
