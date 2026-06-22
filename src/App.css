@@ -856,6 +856,113 @@
   font-weight: 800;
 }
 
+.import-preview {
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #fbfcfa;
+  display: grid;
+  gap: 12px;
+}
+
+.import-preview h3 {
+  margin: 2px 0 0;
+  color: var(--color-text);
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.import-preview__metrics,
+.section-count-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.import-preview__metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.section-count-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.import-preview__metrics article,
+.section-count-grid article {
+  min-width: 0;
+  padding: 10px 8px;
+  border-radius: 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  display: grid;
+  gap: 3px;
+  text-align: center;
+}
+
+.import-preview__metrics span,
+.section-count-grid span {
+  color: var(--color-muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.import-preview__metrics strong,
+.section-count-grid strong {
+  color: var(--color-primary-dark);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.preview-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.preview-table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.preview-table th,
+.preview-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.preview-table th {
+  color: var(--color-muted);
+  background: var(--color-surface-muted);
+  font-weight: 800;
+}
+
+.preview-table td {
+  color: var(--color-text);
+}
+
+.preview-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.import-warning {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--color-red-soft);
+  color: var(--color-red);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.import-preview__actions {
+  display: grid;
+  gap: 10px;
+}
+
 .danger-panel {
   padding: 16px;
   background: var(--color-red-soft);

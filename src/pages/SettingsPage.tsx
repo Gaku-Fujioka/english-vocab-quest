@@ -3,6 +3,7 @@ import {
   downloadAppBackup,
   parseAppBackupJson,
   parseVocabularyCsv,
+  type VocabularyCsvImportResult,
 } from '../lib/importExport'
 import type { AppStorageSnapshot } from '../lib/storage'
 import type { AppSettings, TargetScore } from '../types/settings'
@@ -24,6 +25,10 @@ type SettingsPageProps = {
   wordCount: number
 }
 
+type CsvPreview = Extract<VocabularyCsvImportResult, { ok: true }> & {
+  fileName: string
+}
+
 export function SettingsPage({
   appSnapshot,
   onAppDataReplace,
@@ -34,6 +39,7 @@ export function SettingsPage({
   wordCount,
 }: SettingsPageProps) {
   const [message, setMessage] = useState<SettingsMessage | null>(null)
+  const [csvPreview, setCsvPreview] = useState<CsvPreview | null>(null)
 
   const handleTargetScoreChange = (targetScore: TargetScore) => {
     onSettingsChange({
@@ -58,6 +64,7 @@ export function SettingsPage({
       const importResult = parseVocabularyCsv(await file.text())
 
       if (!importResult.ok) {
+        setCsvPreview(null)
         setMessage({
           type: 'error',
           text: importResult.error,
@@ -66,6 +73,7 @@ export function SettingsPage({
       }
 
       if (importResult.importedCount === 0) {
+        setCsvPreview(null)
         setMessage({
           type: 'error',
           text: `有効な単語がありませんでした。スキップ: ${importResult.skippedCount}行`,
@@ -73,26 +81,16 @@ export function SettingsPage({
         return
       }
 
-      const shouldReplace = window.confirm(
-        `${importResult.importedCount}語をインポートします。` +
-          `\nスキップ: ${importResult.skippedCount}行` +
-          '\n\n現在の単語データを置き換え、学習状態と学習記録をクリアします。続行しますか？',
-      )
-
-      if (!shouldReplace) {
-        setMessage({
-          type: 'info',
-          text: 'CSVインポートをキャンセルしました。',
-        })
-        return
-      }
-
-      onVocabularyReplace(importResult.words)
+      setCsvPreview({
+        ...importResult,
+        fileName: file.name,
+      })
       setMessage({
-        type: 'success',
-        text: `${importResult.importedCount}語をインポートしました。スキップ: ${importResult.skippedCount}行`,
+        type: 'info',
+        text: 'CSVを解析しました。プレビューを確認してから取り込んでください。',
       })
     } catch {
+      setCsvPreview(null)
       setMessage({
         type: 'error',
         text: 'CSVファイルを読み込めませんでした。',
@@ -100,6 +98,27 @@ export function SettingsPage({
     } finally {
       input.value = ''
     }
+  }
+
+  const handleConfirmCsvImport = () => {
+    if (csvPreview === null) {
+      return
+    }
+
+    onVocabularyReplace(csvPreview.words)
+    setMessage({
+      type: 'success',
+      text: `${csvPreview.importedCount}語をインポートしました。スキップ: ${csvPreview.skippedCount}行`,
+    })
+    setCsvPreview(null)
+  }
+
+  const handleCancelCsvImport = () => {
+    setCsvPreview(null)
+    setMessage({
+      type: 'info',
+      text: 'CSVインポートをキャンセルしました。',
+    })
   }
 
   const handleJsonExport = () => {
@@ -239,6 +258,84 @@ export function SettingsPage({
             type="file"
           />
         </label>
+
+        {csvPreview !== null ? (
+          <section className="import-preview" aria-labelledby="csv-preview-title">
+            <div>
+              <p className="eyebrow">Import Preview</p>
+              <h3 id="csv-preview-title">{csvPreview.fileName}</h3>
+            </div>
+
+            <div className="import-preview__metrics" aria-label="CSV解析結果">
+              <article>
+                <span>Valid</span>
+                <strong>{csvPreview.importedCount}</strong>
+              </article>
+              <article>
+                <span>Skipped</span>
+                <strong>{csvPreview.skippedCount}</strong>
+              </article>
+              <article>
+                <span>Duplicates</span>
+                <strong>{csvPreview.duplicateCount}</strong>
+              </article>
+            </div>
+
+            <div className="section-count-grid" aria-label="セクション別件数">
+              {(['600', '700', '850', '950'] as const).map((section) => (
+                <article key={section}>
+                  <span>{section}</span>
+                  <strong>{csvPreview.sectionCounts[section]}</strong>
+                </article>
+              ))}
+            </div>
+
+            <div className="preview-table-wrap">
+              <table className="preview-table">
+                <thead>
+                  <tr>
+                    <th>word</th>
+                    <th>meaning</th>
+                    <th>partOfSpeech</th>
+                    <th>section</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {csvPreview.words.slice(0, 10).map((word) => (
+                    <tr key={word.id}>
+                      <td>{word.word}</td>
+                      <td>{word.meaning}</td>
+                      <td>{word.partOfSpeech}</td>
+                      <td>{word.section}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <p className="import-warning">
+              Importing vocabulary will replace the current vocabulary list and
+              reset learning states and daily records.
+            </p>
+
+            <div className="import-preview__actions">
+              <button
+                className="secondary-button"
+                onClick={handleCancelCsvImport}
+                type="button"
+              >
+                キャンセル
+              </button>
+              <button
+                className="danger-button"
+                onClick={handleConfirmCsvImport}
+                type="button"
+              >
+                Replace vocabulary and reset progress
+              </button>
+            </div>
+          </section>
+        ) : null}
       </section>
 
       <section className="panel settings-section">

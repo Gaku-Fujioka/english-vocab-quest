@@ -21,6 +21,8 @@ export type VocabularyCsvImportResult =
       words: Word[]
       importedCount: number
       skippedCount: number
+      duplicateCount: number
+      sectionCounts: Record<WordSection, number>
     }
   | {
       ok: false
@@ -152,6 +154,13 @@ export function parseVocabularyCsv(csvText: string): VocabularyCsvImportResult {
   const importedWords: Word[] = []
   const importedWordKeys = new Set<string>()
   let skippedCount = 0
+  let duplicateCount = 0
+  const sectionCounts = {
+    '600': 0,
+    '700': 0,
+    '850': 0,
+    '950': 0,
+  } satisfies Record<WordSection, number>
 
   for (const row of dataRows) {
     const word = row[headerIndexes.get('word') ?? -1]?.trim() ?? ''
@@ -174,10 +183,12 @@ export function parseVocabularyCsv(csvText: string): VocabularyCsvImportResult {
 
     if (importedWordKeys.has(duplicateKey)) {
       skippedCount += 1
+      duplicateCount += 1
       continue
     }
 
     importedWordKeys.add(duplicateKey)
+    sectionCounts[section] += 1
     importedWords.push({
       id: createImportedWordId(section, word),
       word,
@@ -192,6 +203,8 @@ export function parseVocabularyCsv(csvText: string): VocabularyCsvImportResult {
     words: importedWords,
     importedCount: importedWords.length,
     skippedCount,
+    duplicateCount,
+    sectionCounts,
   }
 }
 
