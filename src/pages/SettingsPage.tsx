@@ -1,4 +1,14 @@
-import { useState, type ChangeEvent } from 'react'
+import { useCallback, useEffect, useState, type ChangeEvent } from 'react'
+import type { User } from '@supabase/supabase-js'
+import {
+  getCloudSnapshot,
+  getCurrentUser,
+  restoreCloudSnapshot,
+  saveCloudSnapshot,
+  signInWithEmail,
+  signOut,
+  signUpWithEmail,
+} from '../lib/cloudSync'
 import {
   downloadAppBackup,
   parseAppBackupJson,
@@ -6,6 +16,7 @@ import {
   type VocabularyCsvImportResult,
 } from '../lib/importExport'
 import type { AppStorageSnapshot } from '../lib/storage'
+import { isSupabaseConfigured, supabaseConfigMessage } from '../lib/supabase'
 import type { AppSettings, TargetScore } from '../types/settings'
 import { TARGET_SCORES } from '../types/settings'
 import type { Word } from '../types/word'
@@ -40,6 +51,91 @@ export function SettingsPage({
 }: SettingsPageProps) {
   const [message, setMessage] = useState<SettingsMessage | null>(null)
   const [csvPreview, setCsvPreview] = useState<CsvPreview | null>(null)
+  const [cloudUser, setCloudUser] = useState<User | null>(null)
+  const [cloudUpdatedAt, setCloudUpdatedAt] = useState<string | null>(null)
+  const [cloudEmail, setCloudEmail] = useState('')
+  const [cloudPassword, setCloudPassword] = useState('')
+  const [isCloudBusy, setIsCloudBusy] = useState(false)
+
+  const refreshCloudState = useCallback(async () => {
+    if (!isSupabaseConfigured) {
+      setCloudUser(null)
+      setCloudUpdatedAt(null)
+      return
+    }
+
+    const userResult = await getCurrentUser()
+
+    if (!userResult.ok) {
+      setMessage({
+        type: 'error',
+        text: userResult.error,
+      })
+      return
+    }
+
+    setCloudUser(userResult.data)
+
+    if (userResult.data === null) {
+      setCloudUpdatedAt(null)
+      return
+    }
+
+    const snapshotResult = await getCloudSnapshot()
+
+    if (!snapshotResult.ok) {
+      setCloudUpdatedAt(null)
+      return
+    }
+
+    setCloudUpdatedAt(snapshotResult.data?.updatedAt ?? null)
+  }, [])
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) {
+      return
+    }
+
+    let shouldUpdate = true
+
+    void getCurrentUser().then(async (userResult) => {
+      if (!shouldUpdate) {
+        return
+      }
+
+      if (!userResult.ok) {
+        setMessage({
+          type: 'error',
+          text: userResult.error,
+        })
+        return
+      }
+
+      setCloudUser(userResult.data)
+
+      if (userResult.data === null) {
+        setCloudUpdatedAt(null)
+        return
+      }
+
+      const snapshotResult = await getCloudSnapshot()
+
+      if (!shouldUpdate) {
+        return
+      }
+
+      if (!snapshotResult.ok) {
+        setCloudUpdatedAt(null)
+        return
+      }
+
+      setCloudUpdatedAt(snapshotResult.data?.updatedAt ?? null)
+    })
+
+    return () => {
+      shouldUpdate = false
+    }
+  }, [])
 
   const handleTargetScoreChange = (targetScore: TargetScore) => {
     onSettingsChange({
@@ -121,6 +217,137 @@ export function SettingsPage({
     })
   }
 
+  const handleCloudAuth = async (mode: 'signUp' | 'login') => {
+    if (cloudEmail.trim() === '' || cloudPassword === '') {
+      setMessage({
+        type: 'error',
+        text: 'メールアドレスとパスワードを入力してください。',
+      })
+      return
+    }
+
+    setIsCloudBusy(true)
+
+    const authResult =
+      mode === 'signUp'
+        ? await signUpWithEmail(cloudEmail.trim(), cloudPassword)
+        : await signInWithEmail(cloudEmail.trim(), cloudPassword)
+
+    if (!authResult.ok) {
+      setMessage({
+        type: 'error',
+        text: authResult.error,
+      })
+      setIsCloudBusy(false)
+      return
+    }
+
+    setCloudPassword('')
+    setMessage({
+      type: 'success',
+      text:
+        mode === 'signUp'
+          ? 'サインアップしました。確認メールが必要な場合はメールを確認してください。'
+          : 'ログインしました。',
+    })
+    await refreshCloudState()
+    setIsCloudBusy(false)
+  }
+
+  const handleCloudLogout = async () => {
+    setIsCloudBusy(true)
+    const signOutResult = await signOut()
+
+    if (!signOutResult.ok) {
+      setMessage({
+        type: 'error',
+        text: signOutResult.error,
+      })
+      setIsCloudBusy(false)
+      return
+    }
+
+    setCloudUser(null)
+    setCloudUpdatedAt(null)
+    setMessage({
+      type: 'success',
+      text: 'ログアウトしました。',
+    })
+    setIsCloudBusy(false)
+  }
+
+  const handleSaveToCloud = async () => {
+    if (cloudUser === null) {
+      setMessage({
+        type: 'error',
+        text: 'Cloud sync requires login.',
+      })
+      return
+    }
+
+    setIsCloudBusy(true)
+    const saveResult = await saveCloudSnapshot(appSnapshot)
+
+    if (!saveResult.ok) {
+      setMessage({
+        type: 'error',
+        text: saveResult.error,
+      })
+      setIsCloudBusy(false)
+      return
+    }
+
+    setCloudUpdatedAt(saveResult.data.updatedAt)
+    setMessage({
+      type: 'success',
+      text: 'このブラウザのデータをクラウドに保存しました。',
+    })
+    setIsCloudBusy(false)
+  }
+
+  const handleRestoreFromCloud = async () => {
+    if (cloudUser === null) {
+      setMessage({
+        type: 'error',
+        text: 'Cloud sync requires login.',
+      })
+      return
+    }
+
+    setIsCloudBusy(true)
+    const restoreResult = await restoreCloudSnapshot()
+
+    if (!restoreResult.ok) {
+      setMessage({
+        type: 'error',
+        text: restoreResult.error,
+      })
+      setIsCloudBusy(false)
+      return
+    }
+
+    const shouldRestore = window.confirm(
+      'Cloud restore will replace the current browser data. 続行しますか？',
+    )
+
+    if (!shouldRestore) {
+      setMessage({
+        type: 'info',
+        text: 'クラウド復元をキャンセルしました。',
+      })
+      setIsCloudBusy(false)
+      return
+    }
+
+    onAppDataReplace(restoreResult.data.snapshot)
+    setCloudUpdatedAt(restoreResult.data.updatedAt)
+    setMessage({
+      type: 'success',
+      text: 'クラウドデータをこのブラウザに復元しました。',
+    })
+    setIsCloudBusy(false)
+  }
+
   const handleJsonExport = () => {
     downloadAppBackup(appSnapshot)
     setMessage({
@@ -198,6 +425,14 @@ export function SettingsPage({
       text: '全データをリセットし、サンプル単語を再登録しました。',
     })
   }
+
+  const formattedCloudUpdatedAt =
+    cloudUpdatedAt === null
+      ? 'Not saved yet'
+      : new Intl.DateTimeFormat(undefined, {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        }).format(new Date(cloudUpdatedAt))
 
   return (
     <div className="page page-settings">
@@ -360,6 +595,108 @@ export function SettingsPage({
             type="file"
           />
         </label>
+      </section>
+
+      <section className="panel settings-section">
+        <div className="section-heading">
+          <h2>Cloud Sync</h2>
+          <span>{isSupabaseConfigured ? 'Configured' : 'Not configured'}</span>
+        </div>
+
+        {!isSupabaseConfigured ? (
+          <p className="settings-message settings-message--info" role="status">
+            Supabase is not configured. {supabaseConfigMessage}
+          </p>
+        ) : (
+          <>
+            <div className="cloud-status-grid">
+              <article>
+                <span>Account</span>
+                <strong>{cloudUser?.email ?? 'Not signed in'}</strong>
+              </article>
+              <article>
+                <span>Last cloud save</span>
+                <strong>{formattedCloudUpdatedAt}</strong>
+              </article>
+            </div>
+
+            {cloudUser === null ? (
+              <div className="cloud-form">
+                <label>
+                  <span>Email</span>
+                  <input
+                    autoComplete="email"
+                    className="text-input"
+                    onChange={(event) => setCloudEmail(event.currentTarget.value)}
+                    type="email"
+                    value={cloudEmail}
+                  />
+                </label>
+                <label>
+                  <span>Password</span>
+                  <input
+                    autoComplete="current-password"
+                    className="text-input"
+                    onChange={(event) =>
+                      setCloudPassword(event.currentTarget.value)
+                    }
+                    type="password"
+                    value={cloudPassword}
+                  />
+                </label>
+                <div className="cloud-button-row">
+                  <button
+                    className="secondary-button"
+                    disabled={isCloudBusy}
+                    onClick={() => void handleCloudAuth('signUp')}
+                    type="button"
+                  >
+                    Sign up
+                  </button>
+                  <button
+                    className="primary-button"
+                    disabled={isCloudBusy}
+                    onClick={() => void handleCloudAuth('login')}
+                    type="button"
+                  >
+                    Login
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="cloud-actions">
+                <p className="cloud-warning">
+                  Cloud restore will replace the current browser data.
+                </p>
+                <button
+                  className="primary-button"
+                  disabled={isCloudBusy}
+                  onClick={() => void handleSaveToCloud()}
+                  type="button"
+                >
+                  Save this browser data to cloud
+                </button>
+                <button
+                  className="secondary-button"
+                  disabled={isCloudBusy}
+                  onClick={() => void handleRestoreFromCloud()}
+                  type="button"
+                >
+                  Restore cloud data to this browser
+                </button>
+                <button
+                  className="action-row action-row--standalone"
+                  disabled={isCloudBusy}
+                  onClick={() => void handleCloudLogout()}
+                  type="button"
+                >
+                  <span>Logout</span>
+                  <span aria-hidden="true">›</span>
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </section>
 
       <section className="danger-panel">

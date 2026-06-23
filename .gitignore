@@ -30,3 +30,6 @@ dist-ssr
 
 # local exports
 /exports/
+
+.env
+.env.local
