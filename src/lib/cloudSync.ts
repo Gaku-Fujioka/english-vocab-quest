@@ -18,6 +18,21 @@ export type CloudSnapshot = {
   updatedAt: string
 }
 
+export function subscribeToAuthChanges(
+  onUserChange: (user: User | null) => void,
+): () => void {
+  if (!isSupabaseConfigured || supabase === null) {
+    onUserChange(null)
+    return () => undefined
+  }
+
+  const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+    onUserChange(session?.user ?? null)
+  })
+
+  return () => data.subscription.unsubscribe()
+}
+
 function getMissingConfigError(): CloudSyncResult<never> {
   return {
     ok: false,

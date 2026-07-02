@@ -14,6 +14,7 @@ import {
 } from '../lib/scheduler'
 import type {
   DailyLearningRecord,
+  LearningSession,
   NewWordMode,
   WordLearningState,
 } from '../types/learning'
@@ -21,8 +22,10 @@ import type { AppSettings } from '../types/settings'
 import type { Word } from '../types/word'
 
 type HomePageProps = {
+  activeSession: LearningSession | null
   dailyRecords: DailyLearningRecord[]
   learningStates: WordLearningState[]
+  onResumeStudy: () => void
   onStartStudy: (mode: NewWordMode) => void
   settings: AppSettings
   words: Word[]
@@ -56,8 +59,10 @@ const newWordModeOptions = [
 }[]
 
 export function HomePage({
+  activeSession,
   dailyRecords,
   learningStates,
+  onResumeStudy,
   onStartStudy,
   settings,
   words,
@@ -76,6 +81,16 @@ export function HomePage({
     today,
   )
   const currentStreak = getLearningStreak(dailyRecords, today)
+  const activeSessionCompletedCount =
+    activeSession?.kind === 'custom'
+      ? activeSession.completedCustomCount
+      : (activeSession?.completedReviewCount ?? 0) +
+        (activeSession?.completedNewCount ?? 0)
+  const activeSessionWordCount =
+    activeSession?.kind === 'custom'
+      ? activeSession.customWords.length
+      : (activeSession?.reviewWords.length ?? 0) +
+        (activeSession?.newWords.length ?? 0)
 
   const handleConfirmStart = () => {
     setIsStartPanelOpen(false)
@@ -95,6 +110,42 @@ export function HomePage({
           <span>連続</span>
         </div>
       </section>
+
+      {activeSession !== null ? (
+        <section className="panel resume-panel" aria-labelledby="resume-title">
+          <div>
+            <p className="eyebrow">
+              {activeSession.kind === 'custom'
+                ? '保存中のランダムテスト'
+                : '保存中の学習'}
+            </p>
+            <h2 id="resume-title">前回の続きから再開できます</h2>
+          </div>
+          <div
+            aria-label={`学習進捗 ${activeSessionCompletedCount} / ${activeSessionWordCount}`}
+            className="progress-track progress-track--thin"
+          >
+            <span
+              style={{
+                width: `${
+                  activeSessionWordCount === 0
+                    ? 0
+                    : Math.round(
+                        (activeSessionCompletedCount / activeSessionWordCount) *
+                          100,
+                      )
+                }%`,
+              }}
+            />
+          </div>
+          <p className="muted-text">
+            {activeSessionCompletedCount} / {activeSessionWordCount}語 完了
+          </p>
+          <button className="primary-button" onClick={onResumeStudy} type="button">
+            学習を再開する
+          </button>
+        </section>
+      ) : null}
 
       <section className="panel progress-panel" aria-labelledby="today-progress">
         <div className="section-heading">

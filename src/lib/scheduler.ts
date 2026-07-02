@@ -1,4 +1,5 @@
 import type {
+  CustomTestFilters,
   NewWordMode,
   Rating,
   WordLearningState,
@@ -145,6 +146,59 @@ export function selectNewWords(
   }
 
   return selectedWords
+}
+
+export function getCustomTestCandidates(
+  words: Word[],
+  learningStates: WordLearningState[],
+  filters: CustomTestFilters,
+): Word[] {
+  const statesByWordId = new Map(
+    learningStates.map((state) => [state.wordId, state]),
+  )
+  return words.filter((word) => {
+    if (filters.level !== 'all' && word.section !== filters.level) {
+      return false
+    }
+
+    const state = statesByWordId.get(word.id)
+
+    switch (filters.mastery) {
+      case 'all':
+        return true
+      case 'unlearned':
+        return state === undefined
+      case 'learning':
+        return state !== undefined && !state.mastered
+      case 'mastered':
+        return state?.mastered === true
+      case 'weak':
+        return (state?.weakPoint ?? 0) > 0
+    }
+  })
+}
+
+export function selectCustomTestWords(
+  words: Word[],
+  learningStates: WordLearningState[],
+  filters: CustomTestFilters,
+  random: () => number = Math.random,
+): Word[] {
+  const matchingWords = getCustomTestCandidates(
+    words,
+    learningStates,
+    filters,
+  )
+
+  for (let index = matchingWords.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(random() * (index + 1))
+    const currentWord = matchingWords[index]
+
+    matchingWords[index] = matchingWords[randomIndex]
+    matchingWords[randomIndex] = currentWord
+  }
+
+  return matchingWords
 }
 
 export function applyRating(

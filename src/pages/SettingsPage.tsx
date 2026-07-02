@@ -1,25 +1,19 @@
-import { useCallback, useEffect, useState, type ChangeEvent } from 'react'
+import { useEffect, useState, type ChangeEvent } from 'react'
 import type { User } from '@supabase/supabase-js'
 import {
   getCloudSnapshot,
-  getCurrentUser,
   restoreCloudSnapshot,
   saveCloudSnapshot,
-  signInWithEmail,
   signOut,
-  signUpWithEmail,
 } from '../lib/cloudSync'
 import {
   downloadAppBackup,
   parseAppBackupJson,
-  parseVocabularyCsv,
-  type VocabularyCsvImportResult,
 } from '../lib/importExport'
 import type { AppStorageSnapshot } from '../lib/storage'
 import { isSupabaseConfigured, supabaseConfigMessage } from '../lib/supabase'
 import type { AppSettings, TargetScore } from '../types/settings'
 import { TARGET_SCORES } from '../types/settings'
-import type { Word } from '../types/word'
 
 type SettingsMessage = {
   type: 'success' | 'error' | 'info'
@@ -28,68 +22,26 @@ type SettingsMessage = {
 
 type SettingsPageProps = {
   appSnapshot: AppStorageSnapshot
+  currentUser: User
   onAppDataReplace: (snapshot: AppStorageSnapshot) => void
   onResetAllData: () => void
   onSettingsChange: (settings: AppSettings) => void
-  onVocabularyReplace: (words: Word[]) => void
   settings: AppSettings
   wordCount: number
 }
 
-type CsvPreview = Extract<VocabularyCsvImportResult, { ok: true }> & {
-  fileName: string
-}
-
 export function SettingsPage({
   appSnapshot,
+  currentUser,
   onAppDataReplace,
   onResetAllData,
   onSettingsChange,
-  onVocabularyReplace,
   settings,
   wordCount,
 }: SettingsPageProps) {
   const [message, setMessage] = useState<SettingsMessage | null>(null)
-  const [csvPreview, setCsvPreview] = useState<CsvPreview | null>(null)
-  const [cloudUser, setCloudUser] = useState<User | null>(null)
   const [cloudUpdatedAt, setCloudUpdatedAt] = useState<string | null>(null)
-  const [cloudEmail, setCloudEmail] = useState('')
-  const [cloudPassword, setCloudPassword] = useState('')
   const [isCloudBusy, setIsCloudBusy] = useState(false)
-
-  const refreshCloudState = useCallback(async () => {
-    if (!isSupabaseConfigured) {
-      setCloudUser(null)
-      setCloudUpdatedAt(null)
-      return
-    }
-
-    const userResult = await getCurrentUser()
-
-    if (!userResult.ok) {
-      setMessage({
-        type: 'error',
-        text: userResult.error,
-      })
-      return
-    }
-
-    setCloudUser(userResult.data)
-
-    if (userResult.data === null) {
-      setCloudUpdatedAt(null)
-      return
-    }
-
-    const snapshotResult = await getCloudSnapshot()
-
-    if (!snapshotResult.ok) {
-      setCloudUpdatedAt(null)
-      return
-    }
-
-    setCloudUpdatedAt(snapshotResult.data?.updatedAt ?? null)
-  }, [])
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -98,28 +50,7 @@ export function SettingsPage({
 
     let shouldUpdate = true
 
-    void getCurrentUser().then(async (userResult) => {
-      if (!shouldUpdate) {
-        return
-      }
-
-      if (!userResult.ok) {
-        setMessage({
-          type: 'error',
-          text: userResult.error,
-        })
-        return
-      }
-
-      setCloudUser(userResult.data)
-
-      if (userResult.data === null) {
-        setCloudUpdatedAt(null)
-        return
-      }
-
-      const snapshotResult = await getCloudSnapshot()
-
+    void getCloudSnapshot().then((snapshotResult) => {
       if (!shouldUpdate) {
         return
       }
@@ -148,112 +79,6 @@ export function SettingsPage({
     })
   }
 
-  const handleCsvImport = async (event: ChangeEvent<HTMLInputElement>) => {
-    const input = event.currentTarget
-    const file = input.files?.[0]
-
-    if (file === undefined) {
-      return
-    }
-
-    try {
-      const importResult = parseVocabularyCsv(await file.text())
-
-      if (!importResult.ok) {
-        setCsvPreview(null)
-        setMessage({
-          type: 'error',
-          text: importResult.error,
-        })
-        return
-      }
-
-      if (importResult.importedCount === 0) {
-        setCsvPreview(null)
-        setMessage({
-          type: 'error',
-          text: `有効な単語がありませんでした。スキップ: ${importResult.skippedCount}行`,
-        })
-        return
-      }
-
-      setCsvPreview({
-        ...importResult,
-        fileName: file.name,
-      })
-      setMessage({
-        type: 'info',
-        text: 'CSVを解析しました。プレビューを確認してから取り込んでください。',
-      })
-    } catch {
-      setCsvPreview(null)
-      setMessage({
-        type: 'error',
-        text: 'CSVファイルを読み込めませんでした。',
-      })
-    } finally {
-      input.value = ''
-    }
-  }
-
-  const handleConfirmCsvImport = () => {
-    if (csvPreview === null) {
-      return
-    }
-
-    onVocabularyReplace(csvPreview.words)
-    setMessage({
-      type: 'success',
-      text: `${csvPreview.importedCount}語をインポートしました。スキップ: ${csvPreview.skippedCount}行`,
-    })
-    setCsvPreview(null)
-  }
-
-  const handleCancelCsvImport = () => {
-    setCsvPreview(null)
-    setMessage({
-      type: 'info',
-      text: 'CSVインポートをキャンセルしました。',
-    })
-  }
-
-  const handleCloudAuth = async (mode: 'signUp' | 'login') => {
-    if (cloudEmail.trim() === '' || cloudPassword === '') {
-      setMessage({
-        type: 'error',
-        text: 'メールアドレスとパスワードを入力してください。',
-      })
-      return
-    }
-
-    setIsCloudBusy(true)
-
-    const authResult =
-      mode === 'signUp'
-        ? await signUpWithEmail(cloudEmail.trim(), cloudPassword)
-        : await signInWithEmail(cloudEmail.trim(), cloudPassword)
-
-    if (!authResult.ok) {
-      setMessage({
-        type: 'error',
-        text: authResult.error,
-      })
-      setIsCloudBusy(false)
-      return
-    }
-
-    setCloudPassword('')
-    setMessage({
-      type: 'success',
-      text:
-        mode === 'signUp'
-          ? 'サインアップしました。確認メールが必要な場合はメールを確認してください。'
-          : 'ログインしました。',
-    })
-    await refreshCloudState()
-    setIsCloudBusy(false)
-  }
-
   const handleCloudLogout = async () => {
     setIsCloudBusy(true)
     const signOutResult = await signOut()
@@ -267,7 +92,6 @@ export function SettingsPage({
       return
     }
 
-    setCloudUser(null)
     setCloudUpdatedAt(null)
     setMessage({
       type: 'success',
@@ -277,14 +101,6 @@ export function SettingsPage({
   }
 
   const handleSaveToCloud = async () => {
-    if (cloudUser === null) {
-      setMessage({
-        type: 'error',
-        text: 'Cloud sync requires login.',
-      })
-      return
-    }
-
     setIsCloudBusy(true)
     const saveResult = await saveCloudSnapshot(appSnapshot)
 
@@ -306,14 +122,6 @@ export function SettingsPage({
   }
 
   const handleRestoreFromCloud = async () => {
-    if (cloudUser === null) {
-      setMessage({
-        type: 'error',
-        text: 'Cloud sync requires login.',
-      })
-      return
-    }
-
     setIsCloudBusy(true)
     const restoreResult = await restoreCloudSnapshot()
 
@@ -327,7 +135,7 @@ export function SettingsPage({
     }
 
     const shouldRestore = window.confirm(
-      'Cloud restore will replace the current browser data. 続行しますか？',
+      'クラウドから学習データと設定を復元します。固定語彙は変更されません。続行しますか？',
     )
 
     if (!shouldRestore) {
@@ -377,10 +185,9 @@ export function SettingsPage({
 
       const shouldReplace = window.confirm(
         'バックアップJSONからアプリデータを復元します。' +
-          `\n単語: ${importResult.snapshot.words.length}語` +
           `\n学習状態: ${importResult.snapshot.learningStates.length}件` +
           `\n学習記録: ${importResult.snapshot.dailyRecords.length}件` +
-          '\n\n現在のデータは置き換えられます。続行しますか？',
+          '\n\n固定語彙は変更せず、学習データを置き換えます。続行しますか？',
       )
 
       if (!shouldReplace) {
@@ -408,7 +215,7 @@ export function SettingsPage({
 
   const handleResetAllData = () => {
     const shouldReset = window.confirm(
-      '全データをリセットします。単語、学習状態、学習記録、設定が初期化されます。続行しますか？',
+      '学習状態、学習記録、設定をリセットします。固定語彙は変更されません。続行しますか？',
     )
 
     if (!shouldReset) {
@@ -422,7 +229,7 @@ export function SettingsPage({
     onResetAllData()
     setMessage({
       type: 'success',
-      text: '全データをリセットし、サンプル単語を再登録しました。',
+      text: '学習データと設定をリセットしました。固定語彙は維持されます。',
     })
   }
 
@@ -476,105 +283,6 @@ export function SettingsPage({
 
       <section className="panel settings-section">
         <div className="section-heading">
-          <h2>Vocabulary Import</h2>
-          <span>CSV</span>
-        </div>
-        <p className="muted-text">
-          必須カラム: word, meaning, partOfSpeech, section
-        </p>
-        <label className="file-picker">
-          <span>
-            <strong>CSVファイルを選択</strong>
-            <small>既存の単語と学習記録は確認後に置き換えます。</small>
-          </span>
-          <input
-            accept=".csv,text/csv"
-            onChange={handleCsvImport}
-            type="file"
-          />
-        </label>
-
-        {csvPreview !== null ? (
-          <section className="import-preview" aria-labelledby="csv-preview-title">
-            <div>
-              <p className="eyebrow">Import Preview</p>
-              <h3 id="csv-preview-title">{csvPreview.fileName}</h3>
-            </div>
-
-            <div className="import-preview__metrics" aria-label="CSV解析結果">
-              <article>
-                <span>Valid</span>
-                <strong>{csvPreview.importedCount}</strong>
-              </article>
-              <article>
-                <span>Skipped</span>
-                <strong>{csvPreview.skippedCount}</strong>
-              </article>
-              <article>
-                <span>Duplicates</span>
-                <strong>{csvPreview.duplicateCount}</strong>
-              </article>
-            </div>
-
-            <div className="section-count-grid" aria-label="セクション別件数">
-              {(['600', '700', '850', '950'] as const).map((section) => (
-                <article key={section}>
-                  <span>{section}</span>
-                  <strong>{csvPreview.sectionCounts[section]}</strong>
-                </article>
-              ))}
-            </div>
-
-            <div className="preview-table-wrap">
-              <table className="preview-table">
-                <thead>
-                  <tr>
-                    <th>word</th>
-                    <th>meaning</th>
-                    <th>partOfSpeech</th>
-                    <th>section</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {csvPreview.words.slice(0, 10).map((word) => (
-                    <tr key={word.id}>
-                      <td>{word.word}</td>
-                      <td>{word.meaning}</td>
-                      <td>{word.partOfSpeech}</td>
-                      <td>{word.section}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <p className="import-warning">
-              Importing vocabulary will replace the current vocabulary list and
-              reset learning states and daily records.
-            </p>
-
-            <div className="import-preview__actions">
-              <button
-                className="secondary-button"
-                onClick={handleCancelCsvImport}
-                type="button"
-              >
-                キャンセル
-              </button>
-              <button
-                className="danger-button"
-                onClick={handleConfirmCsvImport}
-                type="button"
-              >
-                Replace vocabulary and reset progress
-              </button>
-            </div>
-          </section>
-        ) : null}
-      </section>
-
-      <section className="panel settings-section">
-        <div className="section-heading">
           <h2>Backup / Restore</h2>
           <span>JSON</span>
         </div>
@@ -612,7 +320,7 @@ export function SettingsPage({
             <div className="cloud-status-grid">
               <article>
                 <span>Account</span>
-                <strong>{cloudUser?.email ?? 'Not signed in'}</strong>
+                <strong>{currentUser.email ?? currentUser.id}</strong>
               </article>
               <article>
                 <span>Last cloud save</span>
@@ -620,81 +328,36 @@ export function SettingsPage({
               </article>
             </div>
 
-            {cloudUser === null ? (
-              <div className="cloud-form">
-                <label>
-                  <span>Email</span>
-                  <input
-                    autoComplete="email"
-                    className="text-input"
-                    onChange={(event) => setCloudEmail(event.currentTarget.value)}
-                    type="email"
-                    value={cloudEmail}
-                  />
-                </label>
-                <label>
-                  <span>Password</span>
-                  <input
-                    autoComplete="current-password"
-                    className="text-input"
-                    onChange={(event) =>
-                      setCloudPassword(event.currentTarget.value)
-                    }
-                    type="password"
-                    value={cloudPassword}
-                  />
-                </label>
-                <div className="cloud-button-row">
-                  <button
-                    className="secondary-button"
-                    disabled={isCloudBusy}
-                    onClick={() => void handleCloudAuth('signUp')}
-                    type="button"
-                  >
-                    Sign up
-                  </button>
-                  <button
-                    className="primary-button"
-                    disabled={isCloudBusy}
-                    onClick={() => void handleCloudAuth('login')}
-                    type="button"
-                  >
-                    Login
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="cloud-actions">
-                <p className="cloud-warning">
-                  Cloud restore will replace the current browser data.
-                </p>
-                <button
-                  className="primary-button"
-                  disabled={isCloudBusy}
-                  onClick={() => void handleSaveToCloud()}
-                  type="button"
-                >
-                  Save this browser data to cloud
-                </button>
-                <button
-                  className="secondary-button"
-                  disabled={isCloudBusy}
-                  onClick={() => void handleRestoreFromCloud()}
-                  type="button"
-                >
-                  Restore cloud data to this browser
-                </button>
-                <button
-                  className="action-row action-row--standalone"
-                  disabled={isCloudBusy}
-                  onClick={() => void handleCloudLogout()}
-                  type="button"
-                >
-                  <span>Logout</span>
-                  <span aria-hidden="true">›</span>
-                </button>
-              </div>
-            )}
+            <div className="cloud-actions">
+              <p className="cloud-warning">
+                学習データは自動同期されます。復元すると、この端末の学習データと設定が置き換わります。
+              </p>
+              <button
+                className="primary-button"
+                disabled={isCloudBusy}
+                onClick={() => void handleSaveToCloud()}
+                type="button"
+              >
+                今すぐクラウドへ保存
+              </button>
+              <button
+                className="secondary-button"
+                disabled={isCloudBusy}
+                onClick={() => void handleRestoreFromCloud()}
+                type="button"
+              >
+                クラウドデータを復元
+              </button>
+              <button
+                className="action-row action-row--standalone"
+                disabled={isCloudBusy}
+                onClick={() => void handleCloudLogout()}
+                type="button"
+              >
+                <span>ログアウト</span>
+                <span aria-hidden="true">›</span>
+              </button>
+            </div>
           </>
         )}
       </section>
@@ -702,7 +365,9 @@ export function SettingsPage({
       <section className="danger-panel">
         <div>
           <h2>Danger Zone</h2>
-          <p className="muted-text">初期状態に戻してサンプル単語を再登録します。</p>
+          <p className="muted-text">
+            固定語彙は維持したまま、学習データと設定を初期化します。
+          </p>
         </div>
         <button className="danger-button" onClick={handleResetAllData} type="button">
           全データをリセット
