@@ -429,13 +429,13 @@ function AuthenticatedApp({ user }: { user: User }) {
 
   const handleStartCustomTest = (filters: CustomTestFilters) => {
     if (!finishPreviousSessionIfNeeded()) {
-      return
+      return 'cancelled' as const
     }
 
     const customWords = selectCustomTestWords(words, learningStates, filters)
 
     if (customWords.length === 0) {
-      return
+      return 'empty' as const
     }
 
     const nextSession = createCustomTestSession(customWords)
@@ -443,6 +443,7 @@ function AuthenticatedApp({ user }: { user: User }) {
     setSession(nextSession)
     saveActiveLearningSession(nextSession, user.id)
     setActiveTab('study')
+    return 'started' as const
   }
 
   const handleRevealCurrentCard = () => {

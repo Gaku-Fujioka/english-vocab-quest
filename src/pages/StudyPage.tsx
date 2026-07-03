@@ -18,7 +18,9 @@ type StudyPageProps = {
   onRate: (rating: Rating) => void
   onReturnHome: () => void
   onReveal: () => void
-  onStartCustomTest: (filters: CustomTestFilters) => void
+  onStartCustomTest: (
+    filters: CustomTestFilters,
+  ) => 'started' | 'empty' | 'cancelled'
   session: LearningSession | null
   totalMasteredCount: number
   words: Word[]
@@ -120,11 +122,40 @@ export function StudyPage({
     level: 'all',
     mastery: 'all',
   })
+  const [showEmptyTestState, setShowEmptyTestState] = useState(false)
   const customTestWordCount = getCustomTestCandidates(
     words,
     learningStates,
     customTestFilters,
   ).length
+
+  if (session === null && showEmptyTestState) {
+    return (
+      <div className="page page-study">
+        <section className="panel empty-panel" aria-labelledby="empty-test-title">
+          <p className="eyebrow">自由テスト</p>
+          <h1 id="empty-test-title">該当する単語がありません</h1>
+          <p className="muted-text">
+            条件を変更して、もう一度テストを開始してください。
+          </p>
+          <button
+            className="primary-button"
+            onClick={() => setShowEmptyTestState(false)}
+            type="button"
+          >
+            条件選択に戻る
+          </button>
+          <button
+            className="secondary-button"
+            onClick={onReturnHome}
+            type="button"
+          >
+            ホームへ戻る
+          </button>
+        </section>
+      </div>
+    )
+  }
 
   if (session === null) {
     return (
@@ -184,8 +215,13 @@ export function StudyPage({
 
           <button
             className="primary-button"
-            disabled={customTestWordCount === 0}
-            onClick={() => onStartCustomTest(customTestFilters)}
+            onClick={() => {
+              const result = onStartCustomTest(customTestFilters)
+
+              if (result === 'empty') {
+                setShowEmptyTestState(true)
+              }
+            }}
             type="button"
           >
             ランダムテストを開始する
